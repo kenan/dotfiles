@@ -1,0 +1,2 @@
+
+((digest . "e42425a950e98aebd0774ba6042df396") (undo-list nil (#("-" 0 1 (fontified t face font-lock-constant-face)) . -327) nil (#("e" 0 1 (fontified t face font-lock-constant-face)) . 328) nil (#("d" 0 1 (fontified t face font-lock-constant-face)) . 328) nil (#("o" 0 1 (fontified t face font-lock-constant-face)) . 328) nil (#("m" 0 1 (fontified t face font-lock-constant-face)) . 328) nil (#("-" 0 1 (fontified t face font-lock-constant-face)) . 319) (t 19601 . 50924)))
