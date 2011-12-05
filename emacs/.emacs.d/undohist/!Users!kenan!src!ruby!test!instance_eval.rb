@@ -1,3 +1,0 @@
-
-((digest . "79b7aa7111fe2062fd33454d57429667") (undo-list nil (105 . 106) nil (104 . 105) nil (96 . 97) nil (95 . 96) (t 20035 . 13236) nil (#("
-" 0 1 (fontified t)) . -109) ((marker* . 113) . 1) nil (109 . 110) nil (108 . 109) nil (99 . 104) nil (92 . 99) (92 . 96) nil (89 . 92) nil (84 . 89) nil (#("." 0 1 (fontified t syntax-table nil)) . -84) nil (#("e" 0 1 (fontified t syntax-table nil)) . -85) nil (71 . 86) nil (59 . 71) nil (57 . 59) nil (53 . 57) nil (52 . 53) nil (40 . 42) nil (39 . 40) nil (#("-" 0 1 (fontified t syntax-table nil)) . -39) nil (38 . 40) nil (31 . 38) nil (21 . 31) (22 . 24) (20 . 25) nil (14 . 20) nil (7 . 14) (6 . 11) nil (1 . 6) (t 65535 . 65535)))

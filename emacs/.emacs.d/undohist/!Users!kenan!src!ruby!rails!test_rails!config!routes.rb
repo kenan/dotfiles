@@ -1,2 +1,0 @@
-
-((digest . "4aee34ad0fd835fd6354bb098b79da79") (undo-list nil (1835 . 1836) nil (#(")" 0 1 (fontified t face font-lock-string-face)) . -1835) ((marker*) . 1) ((marker) . -1) nil (1835 . 1836) nil (1834 . 1835) nil (1833 . 1834) nil (1827 . 1833) nil (#("a" 0 1 (fontified t face font-lock-string-face)) . -1827) nil (1824 . 1828) nil (1819 . 1824) nil (1810 . 1819) nil (1799 . 1810) (1798 . 1800) nil (1797 . 1798) nil (1790 . 1797) (#("  " 0 1 (fontified nil) 1 2 (fontified nil syntax-table nil)) . 1789) (1791 . 1792) nil (1788 . 1791) (t 19997 . 18685)))
