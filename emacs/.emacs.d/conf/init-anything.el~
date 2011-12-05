@@ -1,3 +1,0 @@
-(require 'anything-startup)
-
-(provide 'init-anything)

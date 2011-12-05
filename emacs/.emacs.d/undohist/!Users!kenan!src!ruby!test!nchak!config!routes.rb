@@ -1,0 +1,2 @@
+
+((digest . "c00e886b3dd437459043853df4636808") (undo-list nil (95 . 98) nil (93 . 94) nil (87 . 93) nil (#("i" 0 1 (fontified t)) . -87) ((marker*) . 1) nil (#("n" 0 1 (fontified t face font-lock-keyword-face)) . -88) nil (86 . 89) nil (85 . 87) nil (#("}" 0 1 (fontified t syntax-table nil)) . 85) nil (#("{" 0 1 (fontified t)) . -85) nil (85 . 87) nil (84 . 85) nil (81 . 84) nil (75 . 81) nil (67 . 75) nil (58 . 67) nil (56 . 58) nil (37 . 38) (t 19799 . 27678)))

@@ -14,6 +14,7 @@
 (add-to-list 'exec-path "/opt/local/bin")
 (add-to-list 'exec-path "/usr/local/bin")
 
+
 ;; Emacs の種類バージョンを判別するための変数を定義
 ;; @see http://github.com/elim/dotemacs/blob/master/init.el
 (defun x->bool (elt) (not (not elt)))
@@ -38,98 +39,23 @@
 (defvar meadow-p (featurep 'meadow))
 (defvar windows-p (or cygwin-p nt-p meadow-p))
 
-(require 'init-autoinstall)
-
-(when (require 'redo+ nil t)
-  ;;
-  (global-set-key (kbd "C-'") 'redo)) ;C-'にredoをわりあてる。
-
-
-
-(when (require 'color-theme nil t)
-  (color-theme-initialize)
-  (color-theme-hober))
-
-;;(setq face-font-rescale-alist
-;;      '((".*Menlo.*" . 1.0)
-;;	 (" .*Hiragino_Mincho_ProN.*" . 1.3)
-;;	 (".*nfmotoyacedar-bold.*" . 1.3)
-;;	 (".*nfmotoyacedar-medium.*" . 1.3)
-;;	 ("-cdac$" . 1.4)))
-
-
-(setq ns-command-modifier (quote meta))
-(setq ns-alternate-modifier (quote super))
-
-
-;;
-(when (require 'color-moccur nil t)
-  ;;
-  (define-key global-map (kbd "M-o") 'occur-by-moccur)
-  ;;
-  (setq moccur-split-word t)
-  ;;
-  (add-to-list 'dmoccur-exclusion-mask "¥¥.DS_Store")
-  (add-to-list 'dmoccur-exclusion-mask "^#.+#$")
-  (require 'moccur-edit nil t)
-  ;;
-  (when (and (executable-find "cmigemo")
-	     (require 'migemo nil t))
-    (setq moccur-use-migemo t)))
-
-;; grep-edit
-(require 'grep-edit)
-
-(when (and (executable-find "cmigemo")
-	   (require 'migemo nil t))
-  ;;cmigemoを使う
-  (setq migemo-command "cmigemo")
-  ;; Migemo Command Option
-  (setq migemo-options '("-q" "--emacs" "-i" "¥a"))
-  ;;
-  (setq migemo-dictionary
-	"/usr/local/share/migemo/utf-8/migemo-dict")
-  ;;
-  (setq migemo-user-dictionary nil)
-  (setq migemo-regex-dictionary nil)
-  ;;
-  (setq migemo-use-pattern-alist t)
-  (setq migemo-use-frequent-pattern-alist t)
-  (setq migemo-pattern-alit-length 1000)
-  (setq migemo-coding-system 'utf-8-unix)
-  ;; migemo
-  (migemo-init))
-
 (require 'init-global)
+(require 'init-autoinstall)
 (require 'init-skk)
-
-;;
-(when (require 'undohist nil t)
-  (undohist-initialize))
-;;
-;;(when (require 'undo-tree nil t)
-;;  (global-undo-tree-mode))
-
-;; カーソルの位置をundo redoする
-;;(when (require 'point-undo nil t)
-;;  (define-key global-map [f5] 'point-undo)
-;;  (define-key global-map [f6] 'point-redo))
-
-
 (require 'init-autocomplete)
 (require 'init-elscreen)
 (require 'init-anything)
-
-(require 'init-egg)
+(require 'init-ruby)
 
 ;; 環境依存をロード
-;; 環境依存をロード
-(cond
- (mac-p (require 'init-mac))
- (linux-p (require 'init-linux))
- )
+;;(cond
+;; (mac-p (require 'init-mac))
+;; (linux-p (require 'init-linux))
+;; )
 
-
+;;(require 'nyan-mode)
+;;(nyan-mode)
+;;(nyan-start-animation)
 
 ;;終了時に聞く
 (setq confirm-kill-emacs 'y-or-n-p)

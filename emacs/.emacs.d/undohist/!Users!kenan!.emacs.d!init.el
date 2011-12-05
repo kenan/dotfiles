@@ -1,98 +1,224 @@
 
-((digest . "cd21fbf9f96bdbdd5f7ac6920729f01d") (undo-list nil (3438 . 3439) nil (3418 . 3438) (t 19612 . 9261) nil (3291 . 3293) nil (3246 . 3248) nil (3210 . 3212) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . -3331) nil (3331 . 3332) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . -3387) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . -3388) nil (3387 . 3389) (t 19612 . 9194) nil (3397 . 3410) (#("init-any" 0 8 (fontified t face font-lock-constant-face)) . -3397) nil (3402 . 3405) nil (#("e" 0 1 (fontified t face font-lock-constant-face)) . -3402) nil (3397 . 3403) nil (#("p" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("u" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("t" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("r" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("a" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("t" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("s" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("-" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("g" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("n" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("i" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("h" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("t" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("y" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("n" 0 1 (fontified t face font-lock-constant-face)) . 3397) nil (#("a" 0 1 (fontified t face font-lock-constant-face)) . 3397) (t 19612 . 8651) nil (#("
-" 0 1 (fontified t)) . 3387) nil (#("
-" 0 1 (fontified t)) . 3387) nil (#(";;(require 'init-anything)" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 26 (fontified t face font-lock-comment-face)) . 3387) (t 19612 . 7897) nil (3443 . 3444) nil (#("(require 'anything-startup)" 0 1 (fontified t) 1 8 (face font-lock-keyword-face fontified t) 8 10 (fontified t) 10 26 (face font-lock-constant-face fontified t) 26 27 (fontified t)) . 3414) nil (3469 . 3470) nil (nil rear-nonsticky nil 3468 . 3469) (nil fontified nil 3442 . 3469) (3442 . 3469) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3414) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3414) (t 19612 . 7793) nil (#(";;
-;;(keyboard-translate ¥C-h ¥C-?)
-(global-set-key \"\\C-h\" 'delete-backward-char)
+((digest . "68b329da9893e34099c7d8ad5cb9c940") (undo-list nil (#(";; load-pathの設定
+(defun add-to-load-path (&rest paths)
+  (let (path)
+    (dolist (path paths paths)
+      (let ((default-directory (expand-file-name (concat user-emacs-directory path))))
+	(add-to-list 'load-path default-directory)
+	(if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+	    (normal-top-level-add-subdirs-to-load-path))))))
 
-;; helpの変更(Control-0)
-(global-set-key [?\\C-0] 'help-command)
-(global-set-key [?\\C-0 ?\\C-0] 'help-for-help)
+;; elispとconfディレクトリをサブディレクトリごとload-pathに追加
+(add-to-load-path \"elisp\" \"conf\")
+
+;; Pathを設定
+(add-to-list 'exec-path \"/opt/local/bin\")
+(add-to-list 'exec-path \"/usr/local/bin\")
+
+;; Emacs の種類バージョンを判別するための変数を定義
+;; @see http://github.com/elim/dotemacs/blob/master/init.el
+(defun x->bool (elt) (not (not elt)))
+(defvar emacs22-p (equal emacs-major-version 22))
+(defvar emacs23-p (equal emacs-major-version 23))
+(defvar darwin-p (eq system-type 'darwin))
+(defvar ns-p (featurep 'ns))
+(defvar carbon-p (and (eq window-system 'mac) emacs22-p))
+(defvar mac-p (and (eq window-system 'mac) emacs23-p))
+(defvar linux-p (eq system-type 'gnu/linux))
+(defvar colinux-p (when linux-p
+                    (let ((file \"/proc/modules\"))
+                      (and
+                       (file-readable-p file)
+                       (x->bool
+                        (with-temp-buffer
+                          (insert-file-contents file)
+                          (goto-char (point-min))
+                          (re-search-forward \"^cofuse\\.+\" nil t)))))))
+(defvar cygwin-p (eq system-type 'cygwin))
+(defvar nt-p (eq system-type 'windows-nt))
+(defvar meadow-p (featurep 'meadow))
+(defvar windows-p (or cygwin-p nt-p meadow-p))
+
+(require 'init-autoinstall)
+
+
+(when (require 'color-theme nil t)
+  (color-theme-initialize)
+  (color-theme-hober))
+
+;;(setq face-font-rescale-alist
+;;      '((\".*Menlo.*\" . 1.0)
+;;	 (\" .*Hiragino_Mincho_ProN.*\" . 1.3)
+;;	 (\".*nfmotoyacedar-bold.*\" . 1.3)
+;;	 (\".*nfmotoyacedar-medium.*\" . 1.3)
+;;	 (\"-cdac$\" . 1.4)))
+
+
+(setq ns-command-modifier (quote meta))
+(setq ns-alternate-modifier (quote super))
+
+
+(when (require 'color-moccur nil t)
+  ;;
+  (define-key global-map (kbd \"M-o\") 'occur-by-moccur)
+  ;;
+  (setq moccur-split-word t)
+  ;;
+  (add-to-list 'dmoccur-exclusion-mask \"¥¥.DS_Store\")
+  (add-to-list 'dmoccur-exclusion-mask \"^#.+#$\")
+  (require 'moccur-edit nil t)
+  ;;
+  (when (and (executable-find \"cmigemo\")
+	     (require 'migemo nil t))
+    (setq moccur-use-migemo t)))
+
+;; grep-edit
+(require 'grep-edit)
+ 
+ (when (and (executable-find \"cmigemo\")
+ 	   (require 'migemo nil t))
+   ;;cmigemoを使う
+   (setq migemo-command \"cmigemo\")
+   ;; Migemo Command Option
+   (setq migemo-options '(\"-q\" \"--emacs\" \"-i\" \"¥a\"))
+   ;;
+   (setq migemo-dictionary
+ 	\"/usr/local/share/migemo/utf-8/migemo-dict\")
+   ;;
+   (setq migemo-user-dictionary nil)
+   (setq migemo-regex-dictionary nil)
+   ;;
+   (setq migemo-use-pattern-alist t)
+   (setq migemo-use-frequent-pattern-alist t)
+   (setq migemo-pattern-alit-length 1000)
+   (setq migemo-coding-system 'utf-8-unix)
+   ;; migemo
+   (migemo-init))
+
+(require 'init-global)
+(require 'init-skk)
+
 ;;
-;;(global-set-key (kdb \"C-x ?\") 'help-command)
-" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 3 (fontified t face font-lock-comment-face) 3 5 (fontified t face font-lock-comment-delimiter-face) 5 36 (fontified t face font-lock-comment-face) 36 52 (fontified t) 52 58 (fontified t face font-lock-string-face) 58 83 (fontified t) 83 86 (fontified t face font-lock-comment-delimiter-face) 86 105 (fontified t face font-lock-comment-face) 105 190 (fontified t) 190 192 (fontified t face font-lock-comment-delimiter-face) 192 193 (fontified t face font-lock-comment-face) 193 195 (fontified t face font-lock-comment-delimiter-face) 195 240 (fontified t face font-lock-comment-face)) . -1671) (t 19612 . 7713) nil (3654 . 3656) (t 0 . 2) nil (3664 . 3681) nil (#("i" 0 1 (face font-lock-constant-face fontified t symbol "f" document ac-symbol-documentation)) . -3664) nil (#("n" 0 1 (face font-lock-constant-face fontified t symbol "f" document ac-symbol-documentation)) . -3665) nil (#("i" 0 1 (face font-lock-constant-face fontified nil symbol "f" document ac-symbol-documentation)) . -3666) nil (3662 . 3667) nil (3655 . 3662) (#("req" 0 3 (fontified nil)) . -3655) nil (3657 . 3658) nil (#("u" 0 1 (fontified t)) . -3657) nil (#("q" 0 1 (fontified t)) . -3658) nil (3658 . 3659) nil (#("u" 0 1 (fontified t)) . -3658) nil (3658 . 3659) nil (#("q" 0 1 (fontified t)) . -3658) nil (3654 . 3659) nil (3627 . 3629) (t 19612 . 6981) nil (3651 . 3652) nil (3647 . 3651) nil (3627 . 3647) nil (#("
-" 0 1 (fontified t)) . 3602) nil (#("
-" 0 1 (fontified t)) . -3628) nil (3628 . 3629) nil (#(";; anything" 0 3 (fontified t face font-lock-comment-delimiter-face) 3 11 (fontified t face font-lock-comment-face)) . 3725) nil (3736 . 3737) nil (3727 . 3736) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . -3727) nil (3724 . 3728) (t 19602 . 61767) nil (3627 . 3628) nil (3626 . 3627) nil (#("
-" 0 1 (fontified t)) . -3626) nil (#(" " 0 1 (fontified t)) . -3627) nil (#(" " 0 1 (fontified t)) . -3628) nil (#(" " 0 1 (fontified t)) . -3629) nil (#(" " 0 1 (fontified t)) . -3630) nil (#(" " 0 1 (fontified t)) . -3631) nil (#(" " 0 1 (fontified t)) . -3632) nil (#(" " 0 1 (fontified t)) . -3633) nil (#(" " 0 1 (fontified nil)) . -3634) (#("	" 0 1 (fontified nil)) . 3635) (3627 . 3635) 3628 nil (#(" " 0 1 (fontified t)) . -3628) nil (3626 . 3629) nil (3613 . 3626) (#("init-" 0 5 (face font-lock-constant-face fontified t)) . -3613) nil (3612 . 3618) nil (#("(" 0 1 (fontified t)) . -3612) nil (3602 . 3613) (t 19601 . 53407) nil (3743 . 3744) nil (3742 . 3743) nil (3734 . 3742) (#("y-or" 0 4 (symbol "v" document ac-symbol-documentation fontified nil)) . -3734) nil (3732 . 3738) nil (3714 . 3732) (#("confirm-" 0 8 (fontified nil)) . -3714) nil (3709 . 3722) nil (#("
-" 0 1 (fontified t face font-lock-comment-face)) . -3707) nil (3707 . 3708) nil (#("
-" 0 1 (fontified t face font-lock-comment-face)) . -3707) nil (3707 . 3708) nil (#("▼" 0 1 (fontified t face font-lock-comment-face)) . 3705) 3708 nil (3706 . 3707) (#("き" 0 1 (fontified nil face font-lock-comment-face)) . 3706) (#("*" 0 1 (fontified nil face font-lock-comment-face)) . 3707) (3707 . 3709) nil (3706 . 3707) nil (#("k" 0 1 (fontified t face font-lock-comment-face)) . -3706) (3706 . 3707) (#("い" 0 1 (fontified t face font-lock-comment-face)) . -3706) nil (#("く" 0 1 (fontified t face font-lock-comment-face)) . -3707) nil (3706 . 3707) (#("行" 0 1 (fontified t face font-lock-comment-face)) . 3706) 3708 nil (3706 . 3707) (#("い" 0 1 (fontified nil face font-lock-comment-face)) . 3706) (#("*" 0 1 (fontified nil face font-lock-comment-face)) . 3707) (3707 . 3709) nil (3706 . 3707) nil (#("い" 0 1 (fontified t face font-lock-comment-face)) . -3706) nil (#("う" 0 1 (fontified nil face font-lock-comment-face)) . -3707) (#("*" 0 1 (fontified t face font-lock-comment-face)) . 3707) 3709 nil (3707 . 3709) nil (3705 . 3707) nil (3704 . 3705) nil (#("n" 0 1 (fontified t face font-lock-comment-face)) . -3704) (3704 . 3705) (#("▼" 0 1 (fontified nil face font-lock-comment-face)) . 3703) (3704 . 3705) (#("痔" 0 1 (fontified t face font-lock-comment-face)) . -3704) (3704 . 3705) (#("辞" 0 1 (fontified t face font-lock-comment-face)) . -3704) (3704 . 3705) (#("地" 0 1 (fontified t face font-lock-comment-face)) . -3704) (3704 . 3705) (#("字" 0 1 (fontified t face font-lock-comment-face)) . -3704) (3704 . 3705) (#("じ" 0 1 (fontified nil face font-lock-comment-face)) . -3704) (3703 . 3705) (#("▼" 0 1 (fontified t face font-lock-comment-face)) . 3701) 3704 nil (3702 . 3704) (#("しゅうりょう" 0 6 (fontified nil face font-lock-comment-face)) . -3702) (3705 . 3708) (#("ry" 0 2 (fontified t face font-lock-comment-face)) . -3705) (3705 . 3707) (#("r" 0 1 (fontified t face font-lock-comment-face)) . -3705) (3704 . 3706) nil (3701 . 3704) nil (#("j" 0 1 (fontified t face font-lock-comment-face)) . -3701) (3701 . 3702) nil (#("j" 0 1 (fontified t face font-lock-comment-face)) . -3701) (3701 . 3702) (#("S" 0 1 (fontified t face font-lock-comment-face)) . -3701) nil (#("H" 0 1 (fontified t face font-lock-comment-face)) . -3702) nil (#("う" 0 1 (fontified t face font-lock-comment-face)) . -3703) nil (#("う" 0 1 (fontified t face font-lock-comment-face)) . -3704) nil (3701 . 3705) nil (#("
-" 0 1 (fontified t)) . 3699) nil (3698 . 3699) nil (3697 . 3698) nil (3698 . 3700) nil (3698 . 3700) nil (3697 . 3698) (t 19601 . 53199) nil (#("-" 0 1 (face font-lock-constant-face fontified t)) . -3592) nil (#("-" 0 1 (face font-lock-constant-face fontified t)) . -3601) nil (#("m" 0 1 (face font-lock-constant-face fontified t)) . -3602) nil (#("o" 0 1 (face font-lock-constant-face fontified t)) . -3603) nil (#("d" 0 1 (face font-lock-constant-face fontified t)) . -3604) nil (#("e" 0 1 (face font-lock-constant-face fontified t)) . -3605) (t 19601 . 53115) nil (#("-" 0 1 (fontified t face font-lock-constant-face)) . 1571) nil (1562 . 1567) (t 19601 . 53045) nil (1575 . 1576) nil (1574 . 1575) nil (1562 . 1574) (#("auto" 0 4 (fontified t face font-lock-constant-face)) . -1562) nil (1552 . 1566) nil (#("(when (require 'auto-install nil t)
-  (setq auto-install-directory \"~/.emacs.d/elisp/\")
-  (auto-install-update-emacswiki-package-name t)
-  (auto-install-compatibility-setup))
-" 0 1 (fontified t) 1 5 (fontified t face font-lock-keyword-face) 5 7 (fontified t) 7 14 (fontified t face font-lock-keyword-face) 14 16 (fontified t) 16 28 (fontified t face font-lock-constant-face) 28 67 (fontified t) 67 86 (fontified t face font-lock-string-face) 86 137 (fontified t) 137 175 (fontified t)) . -1552) nil (#(";;font
-(set-fontset-font
- nil 'japanese-jisx0208
- (font-spec :family \"Hiragino_Mincho_ProN\"))
-
+(when (require 'undohist nil t)
+  (undohist-initialize))
 ;;
-;; U+3040-309F ひらがな
-;; U+30A0-30FF カタカナ 
-(set-fontset-font
- nil '(#x3040 . #x30ff)
- (font-spec :family \"NfMotoyaCedar\"))
-" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 7 (fontified t face font-lock-comment-face) 7 61 (fontified t) 61 68 (fontified t face font-lock-builtin-face) 68 69 (fontified t) 69 91 (fontified t face font-lock-string-face) 91 95 (fontified t) 95 97 (fontified t face font-lock-comment-delimiter-face) 97 98 (fontified t face font-lock-comment-face) 98 101 (fontified t face font-lock-comment-delimiter-face) 101 118 (fontified t face font-lock-comment-face) 118 121 (fontified t face font-lock-comment-delimiter-face) 121 139 (fontified t face font-lock-comment-face) 139 157 (fontified t) 157 193 (fontified t) 193 200 (fontified t face font-lock-builtin-face) 200 201 (fontified t) 201 216 (fontified t face font-lock-string-face) 216 219 (fontified t)) . -2059) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#("k" 0 1 (fontified t)) . -1818) nil (#("k" 0 1 (fontified t)) . -1819) nil (#("
-" 0 1 (fontified nil)) . 1820) nil (1818 . 1820) nil (#(";;(define-key global-map (kbd \"C-t\") 'other-window)" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 51 (fontified t face font-lock-comment-face)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#(";;(define-key global-map (kbd \"M-k\") 'kill-this-buffer)" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 55 (fontified t face font-lock-comment-face)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#(";;(define-key global-map (kdb \"C-m\") 'newline-and-indent)" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 57 (fontified t face font-lock-comment-face)) . 1818) nil (#("
-" 0 1 (fontified t)) . 1818) nil (#(";; " 0 3 (fontified t face font-lock-comment-delimiter-face)) . 1818) nil (#("
-" 0 1 (fontified t)) . 4208) nil (#(" (carbon-p (require 'init-carbon))" 0 12 (fontified t) 12 19 (fontified t face font-lock-keyword-face) 19 21 (fontified t) 21 32 (fontified t face font-lock-constant-face) 32 34 (fontified t)) . 4208) nil (#("
-" 0 1 (fontified t rear-nonsticky t)) . -4278) nil (#("
-" 0 1 (fontified t)) . -4279) nil (#("(" 0 1 (fontified t)) . -4280) nil (#("r" 0 1 (fontified t)) . -4281) nil (#("e" 0 1 (fontified t)) . -4282) nil (#("q" 0 1 (fontified t)) . -4283) nil (#("u" 0 1 (fontified t)) . -4284) nil (#("i" 0 1 (fontified t)) . -4285) nil (#("r" 0 1 (fontified t)) . -4286) nil (#("e" 0 1 (fontified t face font-lock-keyword-face)) . -4287) nil (#(" " 0 1 (fontified t)) . -4288) nil (#("'" 0 1 (fontified t)) . -4289) nil (#("i" 0 1 (fontified t face font-lock-constant-face)) . -4290) nil (#("n" 0 1 (fontified t face font-lock-constant-face)) . -4291) nil (#("i" 0 1 (fontified t face font-lock-constant-face)) . -4292) nil (#("t" 0 1 (fontified t face font-lock-constant-face)) . -4293) nil (#("-" 0 1 (fontified t face font-lock-constant-face)) . -4294) nil (#("m" 0 1 (fontified t face font-lock-constant-face)) . -4295) nil (#("a" 0 1 (fontified t face font-lock-constant-face)) . -4296) nil (#("c" 0 1 (fontified t face font-lock-constant-face)) . -4297) nil (#(")" 0 1 (fontified t)) . -4298) nil (#(")" 0 1 (fontified t)) . -4299) nil (#("
-" 0 1 (fontified t)) . -4300) nil (#("
-" 0 1 (fontified t)) . 4301) nil (nil rear-nonsticky nil 4278 . 4279) (nil fontified nil 4161 . 4279) (4161 . 4279) nil (4161 . 4162) (t 19601 . 52800) nil (nil rear-nonsticky nil 1550 . 1551) (nil fontified nil 518 . 1551) (518 . 1551) (t 19601 . 52671) nil (2783 . 2784) nil (#("
-" 0 1 (fontified t)) . -2783) nil (#(" " 0 1 (fontified t)) . -2784) nil (#(" " 0 1 (fontified t)) . -2785) nil (#(" " 0 1 (fontified t)) . -2786) nil (#(" " 0 1 (fontified t)) . -2787) nil (#(" " 0 1 (fontified t)) . -2788) nil (#(" " 0 1 (fontified t)) . -2789) nil (#(" " 0 1 (fontified t)) . -2790) nil (#(" " 0 1 (fontified nil)) . -2791) (#("	" 0 1 (fontified nil)) . 2792) (2784 . 2792) 2785 nil (#(" " 0 1 (fontified t)) . -2785) nil (2783 . 2786) nil (2772 . 2783) (#("init-" 0 5 (fontified t face font-lock-constant-face)) . -2772) nil (2762 . 2777) nil (#("'" 0 1 (fontified t)) . -2762) nil (#("r" 0 1 (fontified t)) . -2763) nil (2761 . 2764) nil (#("
+;;(when (require 'undo-tree nil t)
+;;  (global-undo-tree-mode))
 
-;; Mac
-(set-language-environment \"Japanese\")
-(require 'ucs-normalize)
-(prefer-coding-system 'utf-8-hfs)
-(setq file-name-coding-system 'utf-8-hfs)
-(setq locale-coding-system 'utf-8-hfs)
-
-;;(prefer-coding-system 'utf-8)
-;;(setq file-name-coding-system 'utf-8)
-;;(setq locale-coding-system 'utf-8)
-
-;; スタートアップページを表示しない
-(setq inhibit-startup-screen t)
-
-;; ツールバーを非表示
-(tool-bar-mode 0)
-;; スクロールバーを非表示
-(scroll-bar-mode 0)
-;; メニューバーの非表示
-(menu-bar-mode 0)
-
-;; 時間を表示
-(display-time-mode 1)
-;; 行、列の表示
-(column-number-mode t)
-(line-number-mode t)
-
-(global-linum-mode)
-
-;; バッテリー残量の表示
-(display-battery-mode 1)
+;; カーソルの位置をundo redoする
+;;(when (require 'point-undo nil t)
+;;  (define-key global-map [f5] 'point-undo)
+;;  (define-key global-map [f6] 'point-redo))
 
 
-;;(setq frame-title-format
-;;     (format \"%%f - Emacs@%s\" (system-name)))
-
-;; カレントウィンドウの透明度を変更する (85%)
-(set-frame-parameter (selected-frame) 'alpha '(85 50))
-;; (set-frame-parameter nil 'alpha 90)
-
-;;対応する括弧を強調して表示する
-(setq show-paren-delay 0)
-(show-paren-mode t)
-;; expressionは括弧内も強調する
-(setq show-paren-style 'expression)
+(require 'init-autocomplete)
+(require 'init-elscreen)
+(require 'init-anything)
 ;;
-(set-face-background 'show-paren-match-face nil)
-(set-face-underline-p 'show-paren-match-face \"yellow\")
-" 0 2 (fontified t) 2 5 (fontified t face font-lock-comment-delimiter-face) 5 9 (fontified t face font-lock-comment-face) 9 35 (fontified t) 35 45 (fontified t face font-lock-string-face) 45 48 (fontified t) 48 55 (fontified t face font-lock-keyword-face) 55 57 (fontified t) 57 70 (fontified t face font-lock-constant-face) 70 188 (fontified t) 188 190 (fontified t face font-lock-comment-delimiter-face) 190 220 (fontified t face font-lock-comment-face) 220 222 (fontified t face font-lock-comment-delimiter-face) 222 260 (fontified t face font-lock-comment-face) 260 262 (fontified t face font-lock-comment-delimiter-face) 262 297 (fontified t face font-lock-comment-face) 297 298 (fontified t) 298 301 (fontified t face font-lock-comment-delimiter-face) 301 318 (fontified t face font-lock-comment-face) 318 350 (fontified t) 350 351 (fontified t) 351 354 (fontified t face font-lock-comment-delimiter-face) 354 364 (fontified t face font-lock-comment-face) 364 382 (fontified t) 382 385 (fontified t face font-lock-comment-delimiter-face) 385 397 (fontified t face font-lock-comment-face) 397 417 (fontified t) 417 420 (fontified t face font-lock-comment-delimiter-face) 420 431 (fontified t face font-lock-comment-face) 431 450 (fontified t) 450 453 (fontified t face font-lock-comment-delimiter-face) 453 459 (fontified t face font-lock-comment-face) 459 481 (fontified t) 481 484 (fontified t face font-lock-comment-delimiter-face) 484 491 (fontified t face font-lock-comment-face) 491 557 (fontified t) 557 560 (fontified t face font-lock-comment-delimiter-face) 560 571 (fontified t face font-lock-comment-face) 571 598 (fontified t) 598 600 (fontified t face font-lock-comment-delimiter-face) 600 625 (fontified t face font-lock-comment-face) 625 632 (fontified t face font-lock-comment-delimiter-face) 632 673 (fontified t face font-lock-comment-face) 673 674 (fontified t) 674 677 (fontified t face font-lock-comment-delimiter-face) 677 702 (fontified t face font-lock-comment-face) 702 757 (fontified t) 757 760 (fontified t face font-lock-comment-delimiter-face) 760 796 (fontified t face font-lock-comment-face) 796 797 (fontified t) 797 799 (fontified t face font-lock-comment-delimiter-face) 799 815 (fontified t face font-lock-comment-face) 815 861 (fontified t) 861 864 (fontified t face font-lock-comment-delimiter-face) 864 884 (fontified t face font-lock-comment-face) 884 920 (fontified t) 920 922 (fontified t face font-lock-comment-delimiter-face) 922 923 (fontified t face font-lock-comment-face) 923 1017 (fontified t) 1017 1025 (fontified t face font-lock-string-face) 1025 1027 (fontified t)) . -1199) (t 19601 . 52395)))
+;;(require 'init-egg)
+(require 'init-ruby)
+
+;; haml-mode
+(require 'haml-mode nil 't)
+(add-to-list 'auto-mode-alist '(\"¥¥.haml$\" . haml-mode))
+
+;; sass-mode
+(require 'sass-mode nil 't)
+(add-to-list 'auto-mode-alist '(\"¥¥.sass$\" . sass-mode))
+
+;; 環境依存をロード
+;; 環境依存をロード
+(cond
+ (mac-p (require 'init-mac))
+ (linux-p (require 'init-linux))
+ )
+
+;;終了時に聞く
+(setq confirm-kill-emacs 'y-or-n-p)
+
+;;; This was installed by package-install.el.
+;;; This provides support for the package system and
+;;; interfacing with ELPA, the package archive.
+;;; Move this code earlier if you want to reference
+;;; packages in your .emacs.
+(when
+    (load
+     (expand-file-name \"~/.emacs.d/elpa/package.el\"))
+  (package-initialize))
+(put 'set-goal-column 'disabled nil)" 0 3 (fontified t face font-lock-comment-delimiter-face) 3 16 (fontified t face font-lock-comment-face) 16 17 (fontified t) 17 22 (fontified t face font-lock-keyword-face) 22 23 (fontified t) 23 39 (fontified t face font-lock-function-name-face) 39 41 (fontified t) 41 46 (fontified t face font-lock-type-face) 46 57 (fontified t) 57 60 (fontified t face font-lock-keyword-face) 60 73 (fontified t) 73 79 (fontified t face font-lock-keyword-face) 79 106 (fontified t) 106 109 (fontified t face font-lock-keyword-face) 109 232 (fontified t) 232 234 (fontified t face font-lock-keyword-face) 234 343 (fontified t) 343 346 (fontified t face font-lock-comment-delimiter-face) 346 390 (fontified t face font-lock-comment-face) 390 408 (fontified t) 408 415 (fontified t face font-lock-string-face) 415 416 (fontified t) 416 422 (fontified t face font-lock-string-face) 422 425 (fontified t) 425 428 (fontified t face font-lock-comment-delimiter-face) 428 436 (fontified t face font-lock-comment-face) 436 460 (fontified t) 460 476 (fontified t face font-lock-string-face) 476 502 (fontified t) 502 518 (fontified t face font-lock-string-face) 518 520 (fontified t) 520 521 (fontified t) 521 524 (fontified t face font-lock-comment-delimiter-face) 524 554 (fontified t face font-lock-comment-face) 554 557 (fontified t face font-lock-comment-delimiter-face) 557 614 (fontified t face font-lock-comment-face) 614 615 (fontified t) 615 620 (fontified t face font-lock-keyword-face) 620 621 (fontified t) 621 628 (fontified t face font-lock-function-name-face) 628 653 (fontified t) 653 659 (fontified t face font-lock-keyword-face) 659 660 (fontified t) 660 669 (fontified t face font-lock-variable-name-face) 669 703 (fontified t) 703 709 (fontified t face font-lock-keyword-face) 709 710 (fontified t) 710 719 (fontified t face font-lock-variable-name-face) 719 753 (fontified t) 753 759 (fontified t face font-lock-keyword-face) 759 760 (fontified t) 760 768 (fontified t face font-lock-variable-name-face) 768 796 (fontified t) 796 802 (fontified t face font-lock-keyword-face) 802 803 (fontified t) 803 807 (fontified t face font-lock-variable-name-face) 807 809 (fontified t) 809 817 (fontified t face font-lock-keyword-face) 817 819 (fontified t) 819 821 (fontified t face font-lock-constant-face) 821 825 (fontified t) 825 831 (fontified t face font-lock-keyword-face) 831 832 (fontified t) 832 840 (fontified t face font-lock-variable-name-face) 840 883 (fontified t) 883 889 (fontified t face font-lock-keyword-face) 889 890 (fontified t) 890 895 (fontified t face font-lock-variable-name-face) 895 938 (fontified t) 938 944 (fontified t face font-lock-keyword-face) 944 945 (fontified t) 945 952 (fontified t face font-lock-variable-name-face) 952 983 (fontified t) 983 989 (fontified t face font-lock-keyword-face) 989 990 (fontified t) 990 999 (fontified t face font-lock-variable-name-face) 999 1001 (fontified t) 1001 1005 (fontified t face font-lock-keyword-face) 1005 1035 (fontified t) 1035 1038 (fontified t face font-lock-keyword-face) 1038 1046 (fontified t) 1046 1061 (fontified t face font-lock-string-face) 1061 1064 (fontified t) 1064 1194 (fontified t) 1194 1210 (fontified t face font-lock-keyword-face) 1210 1360 (fontified t) 1360 1372 (fontified t face font-lock-string-face) 1372 1387 (fontified t) 1387 1393 (fontified t face font-lock-keyword-face) 1393 1394 (fontified t) 1394 1402 (fontified t face font-lock-variable-name-face) 1402 1430 (fontified t) 1430 1436 (fontified t face font-lock-keyword-face) 1436 1437 (fontified t) 1437 1441 (fontified t face font-lock-variable-name-face) 1441 1473 (fontified t) 1473 1479 (fontified t face font-lock-keyword-face) 1479 1480 (fontified t) 1480 1488 (fontified t face font-lock-variable-name-face) 1488 1490 (fontified t) 1490 1498 (fontified t face font-lock-keyword-face) 1498 1500 (fontified t) 1500 1506 (fontified t face font-lock-constant-face) 1506 1510 (fontified t) 1510 1516 (fontified t face font-lock-keyword-face) 1516 1517 (fontified t) 1517 1526 (fontified t face font-lock-variable-name-face) 1526 1558 (fontified t) 1558 1565 (fontified t face font-lock-keyword-face) 1565 1567 (fontified t) 1567 1583 (fontified t face font-lock-constant-face) 1583 1585 (fontified t) 1585 1588 (fontified t) 1588 1592 (fontified t face font-lock-keyword-face) 1592 1594 (fontified t) 1594 1601 (fontified t face font-lock-keyword-face) 1601 1603 (fontified t) 1603 1614 (fontified t face font-lock-constant-face) 1614 1673 (fontified t) 1673 1675 (fontified t face font-lock-comment-delimiter-face) 1675 1705 (fontified t face font-lock-comment-face) 1705 1713 (fontified t face font-lock-comment-delimiter-face) 1713 1735 (fontified t face font-lock-comment-face) 1735 1737 (fontified t face font-lock-comment-delimiter-face) 1737 1775 (fontified t face font-lock-comment-face) 1775 1777 (fontified t face font-lock-comment-delimiter-face) 1777 1812 (fontified t face font-lock-comment-face) 1812 1814 (fontified t face font-lock-comment-delimiter-face) 1814 1851 (fontified t face font-lock-comment-face) 1851 1853 (fontified t face font-lock-comment-delimiter-face) 1853 1874 (fontified t face font-lock-comment-face) 1874 1962 (fontified t) 1962 1966 (fontified t face font-lock-keyword-face) 1966 1968 (fontified t) 1968 1975 (fontified t face font-lock-keyword-face) 1975 1977 (fontified t) 1977 1989 (fontified t face font-lock-constant-face) 1989 1999 (fontified t) 1999 2001 (fontified t face font-lock-comment-delimiter-face) 2001 2002 (fontified t face font-lock-comment-face) 2002 2032 (fontified t) 2032 2037 (fontified t face font-lock-string-face) 2037 2059 (fontified t) 2059 2061 (fontified t face font-lock-comment-delimiter-face) 2061 2062 (fontified t face font-lock-comment-face) 2062 2091 (fontified t) 2091 2093 (fontified t) 2093 2095 (fontified t face font-lock-comment-delimiter-face) 2095 2096 (fontified t face font-lock-comment-face) 2096 2135 (fontified t) 2135 2148 (fontified t face font-lock-string-face) 2148 2189 (fontified t) 2189 2197 (fontified t face font-lock-string-face) 2197 2202 (fontified t) 2202 2209 (fontified t face font-lock-keyword-face) 2209 2211 (fontified t) 2211 2222 (fontified t face font-lock-constant-face) 2222 2232 (fontified t) 2232 2234 (fontified t face font-lock-comment-delimiter-face) 2234 2235 (fontified t face font-lock-comment-face) 2235 2238 (fontified t) 2238 2242 (fontified t face font-lock-keyword-face) 2242 2265 (fontified t) 2265 2274 (fontified t face font-lock-string-face) 2274 2283 (fontified t) 2283 2290 (fontified t face font-lock-keyword-face) 2290 2292 (fontified t) 2292 2298 (fontified t face font-lock-constant-face) 2298 2341 (fontified t) 2341 2344 (fontified t face font-lock-comment-delimiter-face) 2344 2354 (fontified t face font-lock-comment-face) 2354 2355 (fontified t) 2355 2362 (fontified t face font-lock-keyword-face) 2362 2364 (fontified t) 2364 2373 (fontified t face font-lock-constant-face) 2373 2379 (fontified t) 2379 2383 (fontified t face font-lock-keyword-face) 2383 2406 (fontified t) 2406 2415 (fontified t face font-lock-string-face) 2415 2423 (fontified t) 2423 2430 (fontified t face font-lock-keyword-face) 2430 2432 (fontified t) 2432 2438 (fontified t face font-lock-constant-face) 2438 2450 (fontified t) 2450 2452 (fontified t face font-lock-comment-delimiter-face) 2452 2463 (fontified t face font-lock-comment-face) 2463 2487 (fontified t) 2487 2496 (fontified t face font-lock-string-face) 2496 2501 (fontified t) 2501 2504 (fontified t face font-lock-comment-delimiter-face) 2504 2526 (fontified t face font-lock-comment-face) 2526 2552 (fontified t) 2552 2556 (fontified t face font-lock-string-face) 2556 2557 (fontified t) 2557 2566 (fontified t face font-lock-string-face) 2566 2567 (fontified t) 2567 2571 (fontified t face font-lock-string-face) 2571 2572 (fontified t) 2572 2576 (fontified t face font-lock-string-face) 2576 2582 (fontified t) 2582 2584 (fontified t face font-lock-comment-delimiter-face) 2584 2585 (fontified t face font-lock-comment-face) 2585 2612 (fontified t) 2612 2614 (fontified t) 2614 2657 (fontified t face font-lock-string-face) 2657 2662 (fontified t) 2662 2664 (fontified t face font-lock-comment-delimiter-face) 2664 2665 (fontified t face font-lock-comment-face) 2665 2743 (fontified t) 2743 2745 (fontified t face font-lock-comment-delimiter-face) 2745 2746 (fontified t face font-lock-comment-face) 2746 2917 (fontified t) 2917 2920 (fontified t face font-lock-comment-delimiter-face) 2920 2927 (fontified t face font-lock-comment-face) 2927 2947 (fontified t) 2947 2954 (fontified t face font-lock-keyword-face) 2954 2956 (fontified t) 2956 2967 (fontified t face font-lock-constant-face) 2967 2970 (fontified t) 2970 2977 (fontified t face font-lock-keyword-face) 2977 2979 (fontified t) 2979 2987 (fontified t face font-lock-constant-face) 2987 2990 (fontified t) 2990 2992 (fontified t face font-lock-comment-delimiter-face) 2992 2993 (fontified t face font-lock-comment-face) 2993 2994 (fontified t) 2994 2998 (fontified t face font-lock-keyword-face) 2998 3000 (fontified t) 3000 3007 (fontified t face font-lock-keyword-face) 3007 3009 (fontified t) 3009 3017 (fontified t face font-lock-constant-face) 3017 3050 (fontified t) 3050 3052 (fontified t face font-lock-comment-delimiter-face) 3052 3053 (fontified t face font-lock-comment-face) 3053 3055 (fontified t face font-lock-comment-delimiter-face) 3055 3088 (fontified t face font-lock-comment-face) 3088 3092 (fontified t face font-lock-comment-delimiter-face) 3092 3117 (fontified t face font-lock-comment-face) 3117 3118 (fontified t) 3118 3121 (fontified t face font-lock-comment-delimiter-face) 3121 3141 (fontified t face font-lock-comment-face) 3141 3143 (fontified t face font-lock-comment-delimiter-face) 3143 3177 (fontified t face font-lock-comment-face) 3177 3181 (fontified t face font-lock-comment-delimiter-face) 3181 3222 (fontified t face font-lock-comment-face) 3222 3226 (fontified t face font-lock-comment-delimiter-face) 3226 3268 (fontified t face font-lock-comment-face) 3268 3271 (fontified t) 3271 3278 (fontified t face font-lock-keyword-face) 3278 3280 (fontified t) 3280 3297 (fontified t face font-lock-constant-face) 3297 3300 (fontified t) 3300 3307 (fontified t face font-lock-keyword-face) 3307 3309 (fontified t) 3309 3322 (fontified t face font-lock-constant-face) 3322 3325 (fontified t) 3325 3332 (fontified t face font-lock-keyword-face) 3332 3334 (fontified t) 3334 3347 (fontified t face font-lock-constant-face) 3347 3349 (fontified t) 3349 3351 (fontified t face font-lock-comment-delimiter-face) 3351 3352 (fontified t face font-lock-comment-face) 3352 3354 (fontified t face font-lock-comment-delimiter-face) 3354 3374 (fontified t face font-lock-comment-face) 3374 3375 (fontified t) 3375 3382 (fontified t face font-lock-keyword-face) 3382 3384 (fontified t) 3384 3393 (fontified t face font-lock-constant-face) 3393 3396 (fontified t) 3396 3399 (fontified t face font-lock-comment-delimiter-face) 3399 3409 (fontified t face font-lock-comment-face) 3409 3410 (fontified t) 3410 3417 (fontified t face font-lock-keyword-face) 3417 3419 (fontified t) 3419 3428 (fontified t face font-lock-constant-face) 3428 3469 (fontified t) 3469 3479 (fontified t face font-lock-string-face) 3479 3495 (fontified t) 3495 3498 (fontified t face font-lock-comment-delimiter-face) 3498 3508 (fontified t face font-lock-comment-face) 3508 3509 (fontified t) 3509 3516 (fontified t face font-lock-keyword-face) 3516 3518 (fontified t) 3518 3527 (fontified t face font-lock-constant-face) 3527 3568 (fontified t) 3568 3578 (fontified t face font-lock-string-face) 3578 3594 (fontified t) 3594 3597 (fontified t face font-lock-comment-delimiter-face) 3597 3607 (fontified t face font-lock-comment-face) 3607 3610 (fontified t face font-lock-comment-delimiter-face) 3610 3620 (fontified t face font-lock-comment-face) 3620 3621 (fontified t) 3621 3625 (fontified t face font-lock-keyword-face) 3625 3635 (fontified t) 3635 3642 (fontified t face font-lock-keyword-face) 3642 3644 (fontified t) 3644 3652 (fontified t face font-lock-constant-face) 3652 3666 (fontified t) 3666 3673 (fontified t face font-lock-keyword-face) 3673 3675 (fontified t) 3675 3685 (fontified t face font-lock-constant-face) 3685 3692 (fontified t) 3692 3694 (fontified t face font-lock-comment-delimiter-face) 3694 3701 (fontified t face font-lock-comment-face) 3701 3738 (fontified t) 3738 3742 (fontified t face font-lock-comment-delimiter-face) 3742 3784 (fontified t face font-lock-comment-face) 3784 3788 (fontified t face font-lock-comment-delimiter-face) 3788 3837 (fontified t face font-lock-comment-face) 3837 3841 (fontified t face font-lock-comment-delimiter-face) 3841 3885 (fontified t face font-lock-comment-face) 3885 3889 (fontified t face font-lock-comment-delimiter-face) 3889 3937 (fontified t face font-lock-comment-face) 3937 3941 (fontified t face font-lock-comment-delimiter-face) 3941 3966 (fontified t face font-lock-comment-face) 3966 3967 (fontified t) 3967 3971 (fontified t face font-lock-keyword-face) 3971 4005 (fontified t) 4005 4033 (fontified t face font-lock-string-face) 4033 4096 (fontified t)) . -1) (t 20162 . 17999) ((marker . 1) . -3607) ((marker) . -3655) ((marker) . -3655) ((marker) . -3737) ((marker) . -3737) ((marker) . -3885) ((marker) . -3885) ((marker) . -3738) ((marker) . -3738) ((marker) . -3626) ((marker) . -3626) ((marker) . -3620) ((marker) . -3620) ((marker) . -3691) ((marker) . -3691) ((marker) . -3837) ((marker) . -3837) ((marker) . -3688) ((marker) . -3688) ((marker) . -3692) ((marker) . -3692) ((marker) . -3701) ((marker) . -3701) ((marker) . -3982) ((marker) . -3982) ((marker) . -3937) ((marker) . -3937) ((marker) . -3784) ((marker) . -3784) ((marker) . -4036) ((marker) . -4036) ((marker) . -3607) ((marker) . -3607) ((marker . 1) . -4060) ((marker . 1) . -4060) ((marker) . -3972) ((marker) . -3972) ((marker) . -3966) ((marker) . -3966) ((marker*) . 1) ((marker) . -4096) ((marker*) . 36) ((marker) . -4096) ((marker) . -4096) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3375) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3375) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3325) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3325) (t 20162 . 17539) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2928) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2928) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2915) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2915) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2872) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2872) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2830) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2830) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2784) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2784) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2747) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2747) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2741) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2741) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2703) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2703) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2666) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2666) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2660) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2660) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2613) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2613) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2586) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2586) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2580) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2580) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2527) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2527) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2499) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2499) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2464) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2464) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2448) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2448) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2418) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2418) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2378) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2378) nil (3415 . 3417) nil (3363 . 3365) (t 20162 . 17389) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2985) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2985) (t 20162 . 17305) nil (2985 . 2987) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3413) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3413) (t 20162 . 17265) nil (3413 . 3415) (t 20162 . 17056) nil (#("
+" 0 1 (fontified t)) . 1961) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 2985) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 2985) nil (2985 . 2987) (2965 . 2967) (2950 . 2952) (2905 . 2907) (2861 . 2863) (2813 . 2815) (2774 . 2776) (2766 . 2768) (2726 . 2728) (2687 . 2689) (2679 . 2681) (2630 . 2632) (2601 . 2603) (2593 . 2595) (2538 . 2540) (2508 . 2510) (2471 . 2473) (2453 . 2455) (2421 . 2423) (2379 . 2381) (t 20162 . 16913) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2929) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2929) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2916) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2916) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2873) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2873) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2831) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2831) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2742) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2742) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2787) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2787) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2750) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2750) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2704) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2704) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2667) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2667) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2661) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2661) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2614) nil (2614 . 2615) nil (2614 . 2615) nil (#(" " 0 1 (fontified t)) . 2614) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2614) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2614) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2587) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2587) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2581) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2581) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2528) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2528) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2500) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2500) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2465) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2465) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2449) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2449) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2419) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2419) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2379) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2379) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2377) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2377) (t 20162 . 14777) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3366) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 3366) (t 20162 . 14630) nil (#("." 0 1 (fontified t)) . -1) nil (1 . 2) (t 20162 . 14200) nil (#(" " 0 1 (fontified t)) . 3341) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . -3341) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . -3342) (t 20162 . 14198) nil (3369 . 3371) (t 20162 . 14073) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2342) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2342) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2309) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2309) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2278) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2278) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2237) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2237) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2232) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2232) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2201) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2201) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2152) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2152) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2098) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2098) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2093) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2093) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2064) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2064) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2059) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2059) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2004) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 2004) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1999) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1999) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1963) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1963) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1962) nil (#(";" 0 1 (fontified t face font-lock-comment-delimiter-face)) . 1962) (t 20162 . 12701) nil (3371 . 3374) (t 20162 . 12647) nil (4132 . 4169) 1 (t 20162 . 11610) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (#("
+" 0 1 (fontified t)) . 3765) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (3765 . 3766) nil (#("(when (require 'redo+ nil t)
+  ;;
+  (global-set-key (kbd \"C-'\") 'redo)) ;C-'にredoをわりあてる。
+
+" 0 1 (fontified t) 1 5 (fontified t face font-lock-keyword-face) 5 7 (fontified t) 7 14 (fontified t face font-lock-keyword-face) 14 16 (fontified t) 16 21 (fontified t face font-lock-constant-face) 21 31 (fontified t) 31 33 (fontified t face font-lock-comment-delimiter-face) 33 34 (fontified t face font-lock-comment-face) 34 57 (fontified t) 57 62 (fontified t face font-lock-string-face) 62 72 (fontified t) 72 73 (fontified t face font-lock-comment-delimiter-face) 73 89 (fontified t face font-lock-comment-face) 89 90 (fontified t)) . -1581) nil (#("
+" 0 1 (fontified t)) . 1552) nil (#("
+" 0 1 (fontified t)) . 1552) nil (#("
+" 0 1 (fontified t)) . 1552) (t 20162 . 11523) nil (2457 . 2459) (2422 . 2424) (2389 . 2391) (2346 . 2348) (2339 . 2341) (2306 . 2308) (2255 . 2257) (2199 . 2201) (2192 . 2194) (2161 . 2163) (2154 . 2156) (2097 . 2099) (2090 . 2092) (2052 . 2054) (t 20162 . 11472) nil (#(";; 色の設定
+;; 黒い背景に白い文字
+;; http://d.hatena.ne.jp/coro_1729/20100218/1266499474
+(set-face-foreground 'default \"white\")
+(set-face-background 'default \"black\")
+(setq frame-background-mode 'dark)
+(frame-update-face-colors (selected-frame))
+;; 背景をちょっと透過させる
+(set-frame-parameter nil 'alpha 90)
+
+;; スクロール量を変更
+(setq scroll-conservatively 35
+scroll-margin 0
+scroll-step 4)
+
+;; Stop Auto Backup
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+
+;; UTF-8 and Japanese Setting
+(set-language-environment 'Japanese)
+(set-terminal-coding-system 'utf-8)
+(setq file-name-coding-system 'utf-8)
+(set-clipboard-coding-system 'utf-8)
+(setq default-buffer-file-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-buffer-file-coding-system 'utf-8-unix)
+
+;; ウィンドウサイズ
+(setq initial-frame-alist
+      (append
+       '((top . 22)    ; フレームの Y 位置(ピクセル数)
+     (left . 0)    ; フレームの X 位置(ピクセル数)
+   (width . 170)    ; フレーム幅(文字数)
+    (height . 45)   ; フレーム高(文字数)
+    ) initial-frame-alist))
+" 0 3 (fontified t face font-lock-comment-delimiter-face) 3 8 (fontified t face font-lock-comment-face) 8 11 (fontified t face font-lock-comment-delimiter-face) 11 21 (fontified t face font-lock-comment-face) 21 24 (fontified t face font-lock-comment-delimiter-face) 24 76 (fontified t face font-lock-comment-face) 76 106 (fontified t) 106 113 (fontified t face font-lock-string-face) 113 145 (fontified t) 145 152 (fontified t face font-lock-string-face) 152 189 (fontified t) 189 233 (fontified t) 233 236 (fontified t face font-lock-comment-delimiter-face) 236 249 (fontified t face font-lock-comment-face) 249 285 (fontified t) 285 286 (fontified t) 286 289 (fontified t face font-lock-comment-delimiter-face) 289 299 (fontified t face font-lock-comment-face) 299 330 (fontified t) 330 362 (fontified t) 362 365 (fontified t face font-lock-comment-delimiter-face) 365 382 (fontified t face font-lock-comment-face) 382 441 (fontified t) 441 444 (fontified t face font-lock-comment-delimiter-face) 444 471 (fontified t face font-lock-comment-face) 471 508 (fontified t) 508 544 (fontified t) 544 814 (fontified t) 814 817 (fontified t face font-lock-comment-delimiter-face) 817 826 (fontified t face font-lock-comment-face) 826 889 (fontified t) 889 891 (fontified t face font-lock-comment-delimiter-face) 891 909 (fontified t face font-lock-comment-face) 909 928 (fontified t) 928 930 (fontified t face font-lock-comment-delimiter-face) 930 948 (fontified t face font-lock-comment-face) 948 968 (fontified t) 968 970 (fontified t face font-lock-comment-delimiter-face) 970 981 (fontified t face font-lock-comment-face) 981 1001 (fontified t) 1001 1003 (fontified t face font-lock-comment-delimiter-face) 1003 1014 (fontified t face font-lock-comment-face) 1014 1042 (fontified t)) . -1554) (t 20162 . 11432) nil (#(";; 左側に行数表示
+;; linum.el
+;; show line and column number
+(require 'linum)
+
+(setq linum-format \"%5d\")
+(global-linum-mode t)      ; デフォルトで linum-mode を有効にする
+(setq line-number-mode t)  ; ステータスバーに行数を表示
+" 0 3 (fontified t face font-lock-comment-delimiter-face) 3 11 (fontified t face font-lock-comment-face) 11 14 (fontified t face font-lock-comment-delimiter-face) 14 23 (fontified t face font-lock-comment-face) 23 26 (fontified t face font-lock-comment-delimiter-face) 26 54 (fontified t face font-lock-comment-face) 54 55 (fontified t) 55 62 (fontified t face font-lock-keyword-face) 62 64 (fontified t) 64 69 (fontified t face font-lock-constant-face) 69 91 (fontified t) 91 96 (fontified t face font-lock-string-face) 96 125 (fontified t) 125 127 (fontified t face font-lock-comment-delimiter-face) 127 152 (fontified t face font-lock-comment-face) 152 179 (fontified t) 179 181 (fontified t face font-lock-comment-delimiter-face) 181 195 (fontified t face font-lock-comment-face)) . -1553) nil (#(";;タブをスペースに
+(setq-default tab-width 2 indent-tabs-mode nil)
+" 0 2 (fontified t face font-lock-comment-delimiter-face) 2 11 (fontified t face font-lock-comment-face) 11 59 (fontified t)) . -1552) nil (#(";; スタートアップメッセージを非表示
+(setq inhibit-startup-message t)
+;; バッテリ残量表示
+(display-battery-mode t)
+" 0 3 (fontified t face font-lock-comment-delimiter-face) 3 20 (fontified t face font-lock-comment-face) 20 53 (fontified t) 53 56 (fontified t face font-lock-comment-delimiter-face) 56 65 (fontified t face font-lock-comment-face) 65 90 (fontified t)) . -1552) nil (#("
+" 0 1 (fontified t)) . -1641) (t 20162 . 11315) nil (4462 . 4463) nil (#(" " 0 1 (fontified t)) . 4463) nil (#("
+" 0 1 (fontified t)) . 4487) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 4463) nil (#(";" 0 1 (face font-lock-comment-delimiter-face fontified t)) . 4463) nil (4488 . 4489) nil (4463 . 4466) (4443 . 4446) (4428 . 4431) (4383 . 4386) (4339 . 4342) (4291 . 4294) (4252 . 4255) (4244 . 4247) (4204 . 4207) (4165 . 4168) (4157 . 4160) (4108 . 4111) (4079 . 4082) (4071 . 4074) (4016 . 4019) (3986 . 3989) (3949 . 3952) (3931 . 3934) (3899 . 3902) (3857 . 3860) (3853 . 3856) nil (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3853) (3856 . 3872) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3856) (3881 . 3890) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3881) (3903 . 3917) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3903) (3906 . 3922) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3906) (3926 . 3942) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3926) (3939 . 3955) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3939) (3977 . 3981) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3977) (3980 . 3996) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3980) (3992 . 4001) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 3992) (4031 . 4035) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4031) (4034 . 4050) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4034) (4056 . 4072) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4056) (4079 . 4083) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4079) (4082 . 4098) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4082) (4104 . 4120) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4104) (4135 . 4151) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4135) (4162 . 4178) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4162) (4190 . 4201) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4190) (4193 . 4209) (#(";;" 0 2 (face font-lock-comment-delimiter-face fontified t)) . 4193) nil (4193 . 4195) (#("  (migemo-init))" 0 16 (fontified t)) . -4193) (4190 . 4192) (#("  ;; migemo" 0 2 (fontified t) 2 5 (face font-lock-comment-delimiter-face fontified t) 5 11 (face font-lock-comment-face fontified t)) . -4190) (4162 . 4164) (#("  (setq migemo-c" 0 16 (fontified t)) . -4162) (4135 . 4137) (#("  (setq migemo-p" 0 16 (fontified t)) . -4135) (4104 . 4106) (#("  (setq migemo-u" 0 16 (fontified t)) . -4104) (4082 . 4084) (#("  (setq migemo-u" 0 16 (fontified t)) . -4082) (4079 . 4081) (#("  ;;" 0 2 (fontified t) 2 4 (face font-lock-comment-delimiter-face fontified t)) . -4079) (4056 . 4058) (#("  (setq migemo-r" 0 16 (fontified t)) . -4056) (4034 . 4036) (#("  (setq migemo-u" 0 16 (fontified t)) . -4034) (4031 . 4033) (#("  ;;" 0 2 (fontified t) 2 4 (face font-lock-comment-delimiter-face fontified t)) . -4031) (3992 . 3994) (#("	\"/usr/lo" 0 1 (fontified t) 1 9 (face font-lock-string-face fontified t)) . -3992) (3980 . 3982) (#("  (setq migemo-d" 0 16 (fontified t)) . -3980) (3977 . 3979) (#("  ;;" 0 2 (fontified t) 2 4 (face font-lock-comment-delimiter-face fontified t)) . -3977) (3939 . 3941) (#("  (setq migemo-o" 0 16 (fontified t)) . -3939) (3926 . 3928) (#("  ;; Migemo Comm" 0 2 (fontified t) 2 5 (face font-lock-comment-delimiter-face fontified t) 5 16 (face font-lock-comment-face fontified t)) . -3926) (3906 . 3908) (#("  (setq migemo-c" 0 16 (fontified t)) . -3906) (3903 . 3905) (#("  ;;cmigemoを使う" 0 2 (fontified t) 2 4 (face font-lock-comment-delimiter-face fontified t) 4 14 (face font-lock-comment-face fontified t)) . -3903) (3881 . 3883) (#("	   (requ" 0 5 (fontified t) 5 9 (face font-lock-keyword-face fontified t)) . -3881) (3856 . 3858) (#("(when (and (exec" 0 1 (fontified t) 1 5 (face font-lock-keyword-face fontified t) 5 16 (fontified t)) . -3856) (3853 . 3855) nil (#("
+" 0 1 (fontified t)) . -4402) (t 20162 . 11149) nil (1678 . 1679) nil (#("8" 0 1 (fontified t)) . 1678) nil (1701 . 1702) nil (nil rear-nonsticky nil 1700 . 1701) (nil fontified nil 1643 . 1701) (1643 . 1701) nil (1642 . 1643) (t 20028 . 45009) nil (#("nn" 0 2 (fontified nil)) . -4387) nil (4387 . 4389) (t 20027 . 44186)))
