@@ -35,6 +35,9 @@
 (line-number-mode t)
 (global-linum-mode)
 
+;; ¥の代わりにバックスラッシュを入力する
+(define-key global-map [?¥] [?\\])
+
 ;;タブをスペースに
 (setq-default tab-width 2 indent-tabs-mode nil)
 
